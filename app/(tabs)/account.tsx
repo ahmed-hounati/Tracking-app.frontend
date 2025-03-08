@@ -1,6 +1,6 @@
 import React from "react";
 import { Text } from "react-native";
 
-export default function index() {
-  return <Text>home</Text>
+export default function account() {
+  return <Text>acc</Text>
 }
