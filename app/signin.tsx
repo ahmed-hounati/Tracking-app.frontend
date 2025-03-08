@@ -16,7 +16,7 @@ export default function Signin() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/icon-play.png")}
+      source={require("../assets/images/OldMap.jpg")}
       style={styles.background}
     >
       <StatusBar

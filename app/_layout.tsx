@@ -1,6 +1,15 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
 export default function RootLayout() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/Signin");
+    }
+  }, [isAuthenticated]);
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
