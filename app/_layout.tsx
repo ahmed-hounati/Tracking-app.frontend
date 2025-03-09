@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 export default function RootLayout() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
