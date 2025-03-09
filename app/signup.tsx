@@ -28,7 +28,17 @@ export default function Signup() {
         <Text style={styles.title}>Signup</Text>
 
         <TextInput
-          placeholder="Full Name"
+          placeholder="First Name"
+          style={styles.input}
+          placeholderTextColor="#ccc"
+        />
+        <TextInput
+          placeholder="Last Name"
+          style={styles.input}
+          placeholderTextColor="#ccc"
+        />
+        <TextInput
+          placeholder="BirthDate : yyyy-mm-dd"
           style={styles.input}
           placeholderTextColor="#ccc"
         />
@@ -90,7 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 8,
     fontSize: 16,
-    color: "#000",
+    color: "#fff",
   },
   button: {
     width: "90%",
