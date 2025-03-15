@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import {
   View,
@@ -8,11 +8,37 @@ import {
   ImageBackground,
   StyleSheet,
   StatusBar,
+  Alert,
 } from "react-native";
 import Colors from "@/constants/Colors";
+import { signIn } from "@/services/auth"; // Import the signIn function
 
 export default function Signin() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter your email and password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await signIn({ email, password });
+      console.log("Login Successful:", response);
+
+      // Navigate to the home page or dashboard after login
+      router.push("/(tabs)");
+    } catch (error) {
+      console.error("Login Error:", error);
+      Alert.alert("Login Failed", "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground
@@ -31,25 +57,35 @@ export default function Signin() {
           style={styles.input}
           placeholderTextColor="#ccc"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
         />
         <TextInput
           placeholder="Password"
           style={styles.input}
           placeholderTextColor="#ccc"
           secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => console.log("Signup Pressed")}
+          onPress={handleLogin}
+          disabled={loading}
         >
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>
+            {loading ? "Logging in..." : "Login"}
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.loginButton}
           onPress={() => router.push("/Signup")}
         >
-          <Text style={styles.loginButtonText}>Have an account?Signup</Text>
+          <Text style={styles.loginButtonText}>
+            Don't have an account? Sign up
+          </Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -82,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 8,
     fontSize: 16,
-    color: "#000",
+    color: "#fff",
   },
   button: {
     width: "90%",
@@ -92,18 +128,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  loginButton: {
-    display: "flex",
-    justifyContent: "flex-end",
-    color: Colors.black,
-  },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
+  loginButton: {
+    marginTop: 10,
+  },
   loginButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: Colors.primary,
   },
