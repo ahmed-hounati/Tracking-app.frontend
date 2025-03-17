@@ -2,10 +2,19 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Alert, ActivityIndicator } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Region } from "react-native-maps";
 import * as Location from "expo-location";
+import { sendUserLocation } from "@/services/map";
 
 export default function App() {
   const [location, setLocation] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      sendUserLocation();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     (async () => {

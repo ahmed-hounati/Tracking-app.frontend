@@ -1,11 +1,19 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 export default function RootLayout() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    async function getToken() {
+      let token = await AsyncStorage.getItem("token");
+      if (token) {
+        setIsAuthenticated(true);
+      }
+    }
+    getToken();
     if (!isAuthenticated) {
       router.push("/Signin");
     }
