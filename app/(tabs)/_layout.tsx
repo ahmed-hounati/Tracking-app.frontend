@@ -6,7 +6,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function TabLayout() {
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.black }}>
+    <View style={{ flex: 1, backgroundColor: Colors.grey }}>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#fff",
