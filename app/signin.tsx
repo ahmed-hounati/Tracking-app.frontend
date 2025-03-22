@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import Colors from "@/constants/Colors";
-import { signIn } from "@/services/auth"; // Import the signIn function
+import { signIn } from "@/services/auth";
 
 export default function Signin() {
   const router = useRouter();
@@ -30,7 +30,6 @@ export default function Signin() {
       const response = await signIn({ email, password });
       console.log("Login Successful:", response);
 
-      // Navigate to the home page or dashboard after login
       router.push("/(tabs)");
     } catch (error) {
       console.error("Login Error:", error);

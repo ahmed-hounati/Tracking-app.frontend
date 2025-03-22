@@ -1,19 +1,16 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ✅ Define the base API URL
-const API_URL = "http://192.168.11.115:3000/auth";
+const API_URL = "http://192.168.11.106:3000/auth";
 
-// ✅ Create an Axios instance with a baseURL
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000, // Set timeout to avoid infinite waiting
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ✅ Fix signup function
 export const signUp = async (userData: {
   firstName: string;
   lastName: string;
@@ -30,7 +27,6 @@ export const signUp = async (userData: {
   }
 };
 
-// ✅ Fix signin function
 export const signIn = async (credentials: {
   email: string;
   password: string;

@@ -1,51 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import { getUserLocation } from "@/services/map";
 
 export default function Home() {
+  const [userId, setUserId] = useState("");
   const router = useRouter();
+
+  const handleSearch = async () => {
+    if (!userId.trim()) {
+      Alert.alert("Error", "Please enter a valid user ID.");
+      return;
+    }
+
+    try {
+      const location = await getUserLocation(userId);
+      if (location) {
+        router.push({
+          pathname: "/map",
+          params: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+      } else {
+        Alert.alert("Not Found", "User location not found.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch location.");
+      console.error(error);
+    }
+  };
 
   return (
     <>
       <StatusBar backgroundColor={Colors.grey} barStyle={"light-content"} />
       <View style={styles.container}>
-        <Text style={styles.welcome}>👋 Hello, User!</Text>
-        <Text style={styles.subtitle}>Welcome to your tracking dashboard</Text>
-
-        {/* Map Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/map")}
-        >
-          <Ionicons name="map" size={40} color="#00FFC2" />
-          <Text style={styles.cardText}>Live Map</Text>
-        </TouchableOpacity>
-
-        {/* History Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/historiques")}
-        >
-          <Ionicons name="time" size={40} color="#FF007A" />
-          <Text style={styles.cardText}>Tracking History</Text>
-        </TouchableOpacity>
-
-        {/* Account Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/account")}
-        >
-          <Ionicons name="person" size={40} color="#FFD700" />
-          <Text style={styles.cardText}>Account</Text>
+        <Text style={styles.welcome}>🔍 Search User Location</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter User ID"
+          placeholderTextColor="#ccc"
+          value={userId}
+          onChangeText={setUserId}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleSearch}>
+          <Ionicons name="search" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Search</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -62,33 +73,31 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   welcome: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: "#ccc",
-    marginBottom: 30,
-  },
-  card: {
-    width: "90%",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 20,
-    borderRadius: 15,
-    alignItems: "center",
     marginBottom: 20,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    backdropFilter: "blur(10px)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  cardText: {
-    fontSize: 20,
-    fontWeight: "bold",
+  input: {
+    width: "90%",
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 8,
+    fontSize: 16,
+    color: "#000",
+    marginBottom: 15,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 8,
+  },
+  buttonText: {
     color: "#fff",
-    marginLeft: 15,
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
 });
