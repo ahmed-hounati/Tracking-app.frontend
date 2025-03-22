@@ -1,94 +1,180 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   StatusBar,
+  Alert,
+  ImageBackground,
+  Clipboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import { getUserLocation, sendUserLocation } from "@/services/map";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 
 export default function Home() {
+  const [userId, setUserId] = useState("");
+  const [id, setId] = useState<string | null>(null);
   const router = useRouter();
+  const locationInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearch = async () => {
+    if (!userId.trim()) {
+      Alert.alert("Error", "Please enter a valid user ID.");
+      return;
+    }
+
+    try {
+      const location = await getUserLocation(userId);
+      if (location) {
+        router.push({
+          pathname: "/map",
+          params: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+      } else {
+        Alert.alert("User Not Found", "Please enter a valid user ID");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch location.");
+    }
+  };
+
+  useEffect(() => {
+    const getId = async () => {
+      const rep = await AsyncStorage.getItem("id");
+      setId(rep);
+    };
+
+    const sendLocation = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.log("User is logged out, stopping location updates.");
+        if (locationInterval.current) {
+          clearInterval(locationInterval.current);
+        }
+        return;
+      }
+
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Location permission denied");
+        return;
+      }
+
+      await sendUserLocation();
+    };
+    getId();
+    locationInterval.current = setInterval(sendLocation, 5000);
+
+    return () => {
+      if (locationInterval.current) {
+        clearInterval(locationInterval.current);
+      }
+    };
+  }, [id]);
+
+  const copyToClipboard = async () => {
+    if (id) {
+      Clipboard.setString(id);
+      Alert.alert("Copied!", "Your ID has been copied to the clipboard.");
+    }
+  };
 
   return (
     <>
       <StatusBar backgroundColor={Colors.grey} barStyle={"light-content"} />
-      <View style={styles.container}>
-        <Text style={styles.welcome}>👋 Hello, User!</Text>
-        <Text style={styles.subtitle}>Welcome to your tracking dashboard</Text>
-
-        {/* Map Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/map")}
-        >
-          <Ionicons name="map" size={40} color="#00FFC2" />
-          <Text style={styles.cardText}>Live Map</Text>
-        </TouchableOpacity>
-
-        {/* History Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/historiques")}
-        >
-          <Ionicons name="time" size={40} color="#FF007A" />
-          <Text style={styles.cardText}>Tracking History</Text>
-        </TouchableOpacity>
-
-        {/* Account Section */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => router.push("/account")}
-        >
-          <Ionicons name="person" size={40} color="#FFD700" />
-          <Text style={styles.cardText}>Account</Text>
-        </TouchableOpacity>
-      </View>
+      <ImageBackground
+        source={require("../../assets/images/download.jpg")}
+        style={styles.background}
+        imageStyle={styles.imageBackground}
+      >
+        <View style={styles.idContainer}>
+          <Text style={styles.welcome}>Your ID:</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text style={styles.idText}>{id}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.container}>
+          <Text style={styles.welcome}>🔍 Search User Location</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter User ID"
+            placeholderTextColor="#ccc"
+            value={userId}
+            onChangeText={setUserId}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleSearch}>
+            <Ionicons name="search" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageBackground: {
+    resizeMode: "cover",
+  },
+  idContainer: {
+    position: "absolute",
+    top: 50,
+    left: 50,
+    zIndex: 1,
+  },
+  idText: {
+    fontSize: 20,
+    color: Colors.black,
+    fontWeight: "bold",
+    textDecorationLine: "none",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: Colors.grey,
     width: "100%",
   },
   welcome: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: "#ccc",
-    marginBottom: 30,
-  },
-  card: {
-    width: "90%",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 20,
-    borderRadius: 15,
-    alignItems: "center",
+    color: "#443627",
     marginBottom: 20,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    backdropFilter: "blur(10px)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  cardText: {
-    fontSize: 20,
-    fontWeight: "bold",
+  input: {
+    width: "90%",
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 8,
+    fontSize: 16,
+    color: "#000",
+    marginBottom: 15,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.black,
+    padding: 15,
+    borderRadius: 8,
+  },
+  buttonText: {
     color: "#fff",
-    marginLeft: 15,
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
 });

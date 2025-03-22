@@ -72,6 +72,8 @@ export default function Signup() {
       } else {
         if (response.token) {
           await AsyncStorage.setItem("token", response.token);
+          await AsyncStorage.setItem("id", response.id);
+
           router.replace("/(tabs)");
         } else {
           Alert.alert(
