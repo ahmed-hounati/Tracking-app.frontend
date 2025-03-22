@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,14 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import { getUserLocation } from "@/services/map";
+import { getUserLocation, sendUserLocation } from "@/services/map";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 
 export default function Home() {
   const [userId, setUserId] = useState("");
   const router = useRouter();
+  const locationInterval = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearch = async () => {
     if (!userId.trim()) {
@@ -41,6 +44,29 @@ export default function Home() {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    const sendLocation = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.log("User is logged out, stopping location updates.");
+        clearInterval(locationInterval.current!);
+        return;
+      }
+
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Location permission denied");
+        return;
+      }
+
+      await sendUserLocation();
+    };
+
+    locationInterval.current = setInterval(sendLocation, 5000);
+
+    return () => clearInterval(locationInterval.current!);
+  }, []);
 
   return (
     <>
