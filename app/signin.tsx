@@ -29,10 +29,8 @@ export default function Signin() {
       setLoading(true);
       const response = await signIn({ email, password });
       console.log("Login Successful:", response);
-
       router.push("/(tabs)");
     } catch (error) {
-      console.error("Login Error:", error);
       Alert.alert("Login Failed", "Invalid email or password.");
     } finally {
       setLoading(false);

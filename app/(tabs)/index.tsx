@@ -7,6 +7,8 @@ import {
   StyleSheet,
   StatusBar,
   Alert,
+  ImageBackground,
+  Clipboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +19,7 @@ import * as Location from "expo-location";
 
 export default function Home() {
   const [userId, setUserId] = useState("");
+  const [id, setId] = useState<string | null>(null);
   const router = useRouter();
   const locationInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -37,20 +40,26 @@ export default function Home() {
           },
         });
       } else {
-        Alert.alert("Not Found", "User location not found.");
+        Alert.alert("User Not Found", "Please enter a valid user ID");
       }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch location.");
-      console.error(error);
     }
   };
 
   useEffect(() => {
+    const getId = async () => {
+      const rep = await AsyncStorage.getItem("id");
+      setId(rep);
+    };
+
     const sendLocation = async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         console.log("User is logged out, stopping location updates.");
-        clearInterval(locationInterval.current!);
+        if (locationInterval.current) {
+          clearInterval(locationInterval.current);
+        }
         return;
       }
 
@@ -62,46 +71,88 @@ export default function Home() {
 
       await sendUserLocation();
     };
-
+    getId();
     locationInterval.current = setInterval(sendLocation, 5000);
 
-    return () => clearInterval(locationInterval.current!);
-  }, []);
+    return () => {
+      if (locationInterval.current) {
+        clearInterval(locationInterval.current);
+      }
+    };
+  }, [id]);
+
+  const copyToClipboard = async () => {
+    if (id) {
+      Clipboard.setString(id);
+      Alert.alert("Copied!", "Your ID has been copied to the clipboard.");
+    }
+  };
 
   return (
     <>
       <StatusBar backgroundColor={Colors.grey} barStyle={"light-content"} />
-      <View style={styles.container}>
-        <Text style={styles.welcome}>🔍 Search User Location</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter User ID"
-          placeholderTextColor="#ccc"
-          value={userId}
-          onChangeText={setUserId}
-        />
-        <TouchableOpacity style={styles.button} onPress={handleSearch}>
-          <Ionicons name="search" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Search</Text>
-        </TouchableOpacity>
-      </View>
+      <ImageBackground
+        source={require("../../assets/images/download.jpg")}
+        style={styles.background}
+        imageStyle={styles.imageBackground}
+      >
+        <View style={styles.idContainer}>
+          <Text style={styles.welcome}>Your ID:</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text style={styles.idText}>{id}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.container}>
+          <Text style={styles.welcome}>🔍 Search User Location</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter User ID"
+            placeholderTextColor="#ccc"
+            value={userId}
+            onChangeText={setUserId}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleSearch}>
+            <Ionicons name="search" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageBackground: {
+    resizeMode: "cover",
+  },
+  idContainer: {
+    position: "absolute",
+    top: 50,
+    left: 50,
+    zIndex: 1,
+  },
+  idText: {
+    fontSize: 20,
+    color: Colors.black,
+    fontWeight: "bold",
+    textDecorationLine: "none",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: Colors.grey,
     width: "100%",
   },
   welcome: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#443627",
     marginBottom: 20,
   },
   input: {
@@ -116,7 +167,7 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.black,
     padding: 15,
     borderRadius: 8,
   },

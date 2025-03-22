@@ -29,12 +29,10 @@ export const sendUserLocation = async () => {
         },
       }
     );
-  } catch (error) {
-    console.error("Error sending location", error);
-  }
+  } catch (error) {}
 };
 
-export const getUserLocation = async (id: string) => {  
+export const getUserLocation = async (id: string) => {
   try {
     const token = await AsyncStorage.getItem("token");
     if (!token) {
@@ -49,7 +47,5 @@ export const getUserLocation = async (id: string) => {
     });
 
     return response.data;
-  } catch (error) {
-    console.error("Error getting location", error);
-  }
+  } catch (error) {}
 };

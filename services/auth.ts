@@ -37,19 +37,11 @@ export const signIn = async (credentials: {
 
     if (data.token) {
       await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("id", data.id);
     }
     return data;
   } catch (error) {
-    console.error("Signin Error:", error);
     throw error;
-  }
-};
-
-export const signOut = async () => {
-  try {
-    await AsyncStorage.removeItem("token");
-  } catch (error) {
-    console.error("Signout Error:", error);
   }
 };
 
