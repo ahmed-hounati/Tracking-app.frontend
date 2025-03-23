@@ -46,6 +46,24 @@ export const getUserLocation = async (id: string) => {
       },
     });
 
+    if (response) {
+      await axios.post(
+        "http://192.168.11.106:3000/historiq",
+        {
+          searchedUserId: id,
+          latitude: response.data.latitude,
+          longitude: response.data.longitude,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    }
+
     return response.data;
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 };
