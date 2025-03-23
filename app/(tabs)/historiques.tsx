@@ -35,7 +35,7 @@ export default function Historiques() {
       <View style={styles.container}>
         <Text style={styles.header}>Search History</Text>
         {loading ? (
-          <ActivityIndicator size="large" color="#00ffcc" />
+          <ActivityIndicator size="large" color={Colors.black} />
         ) : history.length > 0 ? (
           <FlatList
             data={history}

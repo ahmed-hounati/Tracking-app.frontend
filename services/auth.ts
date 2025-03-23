@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://192.168.11.106:3000/auth";
+const API_URL = process.env.API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -19,7 +19,7 @@ export const signUp = async (userData: {
   password: string;
 }) => {
   try {
-    const response = await api.post("/signup", userData);
+    const response = await api.post(`${API_URL}/auth/signup`, userData);
     return response.data;
   } catch (error) {
     console.error("Signup Error:", error);
@@ -32,7 +32,7 @@ export const signIn = async (credentials: {
   password: string;
 }) => {
   try {
-    const response = await api.post("/signin", credentials);
+    const response = await api.post(`${API_URL}/auth/signin`, credentials);
     const data = response.data;
 
     if (data.token) {

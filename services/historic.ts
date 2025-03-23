@@ -1,7 +1,14 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://192.168.11.106:3000/historiq";
+const API_URL = process.env.API_URL;
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const getUserHistory = async () => {
   try {
@@ -11,7 +18,7 @@ export const getUserHistory = async () => {
       return null;
     }
 
-    const response = await axios.get(API_URL, {
+    const response = await api.get(`${API_URL}/historiq`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

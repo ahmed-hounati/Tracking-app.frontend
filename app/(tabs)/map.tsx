@@ -3,6 +3,7 @@ import { StyleSheet, View, Alert, ActivityIndicator } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
+import Colors from "@/constants/Colors";
 
 export default function MapScreen() {
   const { latitude, longitude } = useLocalSearchParams();
@@ -49,7 +50,11 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#00ffcc" />
+        <ActivityIndicator
+          style={styles.loading}
+          size="large"
+          color={Colors.black}
+        />
       ) : (
         <MapView
           style={styles.map}
@@ -81,5 +86,8 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  loading: {
+    marginTop: 100,
   },
 });
