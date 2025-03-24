@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   ImageBackground,
+  RefreshControl,
 } from "react-native";
 import { getUserHistory } from "@/services/historic";
 import Colors from "@/constants/Colors";
@@ -13,18 +14,30 @@ import Colors from "@/constants/Colors";
 export default function Historiques() {
   const [history, setHistory] = useState<[] | any>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      setLoading(true);
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
       const data = await getUserHistory();
       if (data) {
         setHistory(data);
       }
-      setLoading(false);
-    };
+    } catch (error) {
+      console.error("Error fetching history:", error);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchHistory();
+  }, []);
+
+  // Function to refresh data on pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchHistory();
+    setRefreshing(false);
   }, []);
 
   return (
@@ -49,6 +62,9 @@ export default function Historiques() {
                 <Text style={styles.id}>ID: {item.searchedUserId?._id}</Text>
               </View>
             )}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           />
         ) : (
           <Text style={styles.noHistory}>No search history found.</Text>
