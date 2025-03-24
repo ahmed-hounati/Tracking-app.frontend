@@ -82,7 +82,7 @@ export default function Signup() {
             [
               {
                 text: "OK",
-                onPress: () => router.push("/Signin"),
+                onPress: () => router.push("/signin"),
               },
             ]
           );

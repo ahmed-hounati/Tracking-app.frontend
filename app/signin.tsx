@@ -48,7 +48,7 @@ export default function Signin() {
         barStyle={"dark-content"}
       />
       <View style={styles.container}>
-        <Text style={styles.title}>Login</Text>
+        <Text style={styles.title}>Signin</Text>
         <TextInput
           placeholder="Email"
           style={styles.input}
@@ -72,7 +72,7 @@ export default function Signin() {
           disabled={loading}
         >
           <Text style={styles.buttonText}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Signin..." : "Signin"}
           </Text>
         </TouchableOpacity>
 
