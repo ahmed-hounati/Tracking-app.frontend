@@ -2,7 +2,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import axios from "axios";
 
-const API_URL = "http://192.168.11.106:3000/location";
+const API_URL = process.env.API_URL;
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const sendUserLocation = async () => {
   try {
@@ -20,8 +27,8 @@ export const sendUserLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = location.coords;
 
-    await axios.post(
-      API_URL,
+    await api.post(
+      `${API_URL}/location`,
       { latitude, longitude },
       {
         headers: {
@@ -40,12 +47,30 @@ export const getUserLocation = async (id: string) => {
       return;
     }
 
-    const response = await axios.get(`${API_URL}/${id}`, {
+    const response = await axios.get(`${API_URL}/location/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
+    if (response) {
+      await axios.post(
+        `${API_URL}/historiq`,
+        {
+          searchedUserId: id,
+          latitude: response.data.latitude,
+          longitude: response.data.longitude,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    }
+
     return response.data;
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 };
